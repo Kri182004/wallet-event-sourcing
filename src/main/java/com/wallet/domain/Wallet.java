@@ -16,4 +16,10 @@ public class Wallet {
     public long getBalance(){
         return balance;
     }
+    public void credit(long amount){//method to add funds to the wallet,we are telling it to increase the balance by a certain amount
+        if(amount<=0){
+            throw new IllegalArgumentException("Credit amount must be positive");
+        }
+        this.balance+=amount;
+    }
 }
