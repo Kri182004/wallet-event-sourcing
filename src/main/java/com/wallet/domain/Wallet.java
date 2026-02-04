@@ -22,4 +22,13 @@ public class Wallet {
         }
         this.balance+=amount;
     }
+    public void debit(long amount){//method to add funds to the wallet,we are telling it to increase the balance by a certain amount
+        if(amount<=0){
+            throw new IllegalArgumentException("Debit amount must be positive");
+        }
+        if(balance<amount){
+            throw new IllegalArgumentException("Insufficient balance");
+        }
+        this.balance-=amount;
+    }
 }
