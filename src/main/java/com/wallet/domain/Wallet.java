@@ -2,6 +2,7 @@ package com.wallet.domain;
 
 import com.wallet.domain.events.WalletCreatedEvent;
 import com.wallet.domain.events.WalletCreditedEvent;
+import com.wallet.domain.events.WalletDebitedEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,15 @@ public class Wallet {
         }
         apply(new WalletCreditedEvent(this.id, amount));
     }
-
+    public void debit(long amount){
+        if(amount<=0){
+            throw new IllegalArgumentException("Debit amount must be positive");
+        }
+        if (amount > this.balance) {
+            throw new IllegalArgumentException("Insufficient balance");            
+        }
+        apply(new WalletDebitedEvent(this.id, amount));
+    }
     // ===== EVENT APPLICATION =====
     // the ONLY place where state is mutated
     private void apply(Object event) {
@@ -59,6 +68,10 @@ public class Wallet {
 
         if (event instanceof WalletCreditedEvent e) {
             this.balance += e.getAmount();
+        }
+
+        if (event instanceof WalletDebitedEvent e) {
+            this.balance -= e.getAmount();
         }
 
         // record every applied event
