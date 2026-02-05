@@ -1,50 +1,76 @@
 package com.wallet.domain;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;//Universally Unique Identifier,gives every wallet a unigye globallu id.//much better than init or long for real systems.
 
 import com.wallet.domain.events.WalletCreatedEvent;
+import com.wallet.domain.events.WalletCreditedEvent;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 public class Wallet {
-    private  UUID id;//unique identifier for the wallet,// final means once assigned it cannot be changed
-    // //no one can chnage it directly
-    //protects wallet identity and is a core rule  n good practice
+
+    private UUID id;
     private long balance;
-    private final List<Object> uncommittedEvents=new ArrayList<>(); 
-    private Wallet(){//private constructor to force use of factory method,
-//ensures wallet is always created with a creation event,you are not allowed to create a walllet directly.
+
+    // stores events that occurred but are not yet persisted
+    private final List<Object> uncommittedEvents = new ArrayList<>();
+
+    // private constructor → forces event-based creation
+    private Wallet() {
     }
+
+    // factory method to create wallet via event
     public static Wallet create(UUID walletId) {
         Wallet wallet = new Wallet();
-        wallet.apply(new WalletCreatedEvent(walletId));//apply method handles the event and updates the state accordingly
+        wallet.apply(new WalletCreatedEvent(walletId));
         return wallet;
     }
 
-    public UUID getId(){
-        return id;//getter method to access the wallet's unique id
-        //alows read only access to the id,you can see it but not change it
+    // getters (read-only access)
+    public UUID getId() {
+        return id;
     }
-    public long getBalance(){
+
+    public long getBalance() {
         return balance;
     }
-    public List<Object> getUncommittedEvents(){
+
+    public List<Object> getUncommittedEvents() {
         return uncommittedEvents;
     }
-    public void apply(Object event){
-        /*This method does two things:Mutates state (id, balance),Records the event for persistence
-Important:The event comes first,State follows*/
-        if(event instanceof WalletCreatedEvent e){
-            this.id=e.getWalletId();
-            this.balance=0;
-            //handle wallet created event
-            //no state change needed here since wallet is already created in constructor
+
+    // ===== DOMAIN BEHAVIOR =====
+
+    public void credit(long amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Credit amount must be positive");
+        }
+        apply(new WalletCreditedEvent(this.id, amount));
     }
-    uncommittedEvents.add(event);//record the event for persistence
-    //new event is added to the list of uncommitted events
-    //these events can later be persisted to an event store
-    //this ensures all changes to the wallet are tracked via events
-    //this is the essence of event sourcing,things that just happened are recorded as events
+
+    // ===== EVENT APPLICATION =====
+    // the ONLY place where state is mutated
+    private void apply(Object event) {
+
+        if (event instanceof WalletCreatedEvent e) {
+            this.id = e.getWalletId();
+            this.balance = 0;
+        }
+
+        if (event instanceof WalletCreditedEvent e) {
+            this.balance += e.getAmount();
+        }
+
+        // record every applied event
+        uncommittedEvents.add(event);
+    }
 }
-}
+/*1️ Wallet is created only through an event, so every wallet has a recorded history of how it started.
+2️ Money is added by creating a “credit” event, not by changing the balance directly.
+3️ All changes to balance happen inside apply(), which reads events and updates state.
+4️ Events are stored in uncommittedEvents, so they can be saved or replayed later.
+5️ Balance is not the truth — events are, and balance is just calculated from them. */
+
 /*wallet.credit(100);
 wallet.debit(40);
 Final balance: 60
