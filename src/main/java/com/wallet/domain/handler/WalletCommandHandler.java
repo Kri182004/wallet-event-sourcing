@@ -1,39 +1,32 @@
 package com.wallet.domain.handler;
 
 import com.wallet.domain.Wallet;
-import com.wallet.domain.command.CreateWalletCommand;
-import com.wallet.domain.command.CreditWalletCommand;
-import com.wallet.domain.command.DebitWalletCommand;
+import com.wallet.domain.command.*;
 
 public class WalletCommandHandler {
+
     private final InMemoryWalletRepository repository;
 
-    public WalletCommandHandler(InMemoryWalletRepository repository){
-        this.repository=repository;
+    public WalletCommandHandler(InMemoryWalletRepository repository) {
+        this.repository = repository;
     }
-    public void handle(CreateWalletCommand command){
-        //create new wallet
-        Wallet wallet=Wallet.create(command.getWalletId());
-        //save to repository
+
+    public void handle(CreateWalletCommand command) {
+        Wallet wallet = Wallet.create(command.getWalletId());
         repository.save(wallet);
     }
-     public void handle(CreditWalletCommand command){
-        //load wallet from reposiorty
-        Wallet wallet=repository.load(command.getwalletId());
-        //perform credit operation
+
+    public void handle(CreditWalletCommand command) {
+        Wallet wallet = repository.load(command.getWalletId());
         wallet.credit(command.getAmount());
-        //save updated wallet back to repository
         repository.save(wallet);
-     }
-    public void handle(DebitWalletCommand command){
-        //load wallet from reposiorty
-        Wallet wallet=repository.load(command.getWalletId());
-        //perform debit operation
+    }
+
+    public void handle(DebitWalletCommand command) {
+        Wallet wallet = repository.load(command.getWalletId());
         wallet.debit(command.getAmount());
-        //save updated wallet back to repository
         repository.save(wallet);
-     }  
-    
+    }
 }
 
 //WHAT THIS CODE DOES(IN EASY WORDS):

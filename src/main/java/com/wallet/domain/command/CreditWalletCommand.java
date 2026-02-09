@@ -9,14 +9,14 @@ public class CreditWalletCommand {
         this.walletId = walletId;
         this.amount = amount;
     }
-public UUID getwalletId(){
+public UUID getWalletId(){
     return walletId;
 }
 public long getAmount(){
     return amount;
+}
+}
 
-}
-}
 //WHAT THIS CODE DOES(IN EASY WORDS):
 //This code defines a command class called CreditWalletCommand,//
 //  which is used to represent the intention to credit a certain amount of money to a wallet .//
