@@ -57,10 +57,4 @@ Handler → orchestration
 
 Wallet → business rules
 
-Events → facts
-
-✔ Read side
-
-Still implicit (getBalance)
-
-Will be separated later*/
+Events → facts */
