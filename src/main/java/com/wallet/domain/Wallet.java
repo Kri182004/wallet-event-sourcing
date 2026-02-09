@@ -17,7 +17,7 @@ public class Wallet {
     private final List<Object> uncommittedEvents = new ArrayList<>();
 
     // private constructor → forces event-based creation
-    private Wallet() {
+    public Wallet() {
     }
 
     // factory method to create wallet via event
@@ -76,6 +76,15 @@ public class Wallet {
 
         // record every applied event
         uncommittedEvents.add(event);
+    }
+
+    public static Wallet replay(List<Object> events) {
+        // TODO Auto-generated method stub
+        Wallet wallet=new Wallet();
+        for(Object event:events){
+            wallet.apply(event);
+        }
+        return wallet;
     }
 }
 /*1️ Wallet is created only through an event, so every wallet has a recorded history of how it started.
