@@ -4,10 +4,18 @@ import com.wallet.domain.command.TransferMoneyCommand;
 
 public class TransferSaga {
     private final WalletCommandHandler walletCommandHandler;
-    public TransferSaga(WalletCommandHandler walletCommandHandler) {
+        private final InMemoryTransferStore transferStore;
+
+    public TransferSaga(WalletCommandHandler walletCommandHandler, InMemoryTransferStore transferStore) {
         this.walletCommandHandler = walletCommandHandler;
+        this.transferStore = transferStore;
     }
     public void handle(TransferMoneyCommand command){
+        //idempotency check (not implemented here, but you would check transferStore for existing transferId)
+        if(transferStore.exists(command.getTransferId())){
+            return; //already processing or completed
+        }
+        transferStore.markStarted(command.getTransferId());
         //1. Debit source wallet
         try{
         walletCommandHandler.handle(
@@ -77,5 +85,19 @@ See events
 Detect incomplete transfer (next improvement)
 
 Compensate if needed
-
+-------------------------------------------------------------
 (We’ll add transfer IDs later for idempotency.)*/
+/*Now your system says:(after adding idempotency)
+
+“If I see the same transfer ID again,
+I will not touch money again.”
+
+This is:
+
+Retry-safe
+
+Crash-safe
+
+Network-safe
+
+This is how Stripe, Paytm, Razorpay think. */

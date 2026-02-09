@@ -2,14 +2,19 @@ package com.wallet.domain.command;
 
 import java.util.UUID;
 public class TransferMoneyCommand {
+    private final UUID transferId;
     private final UUID fromWalletId;
     private final UUID toWalletId;
     private final long amount;
     
-    public TransferMoneyCommand(UUID fromWalletId, UUID toWalletId, long amount) {
+    public TransferMoneyCommand( UUID transferId,UUID fromWalletId, UUID toWalletId, long amount) {
         this.fromWalletId = fromWalletId;
         this.toWalletId = toWalletId;
         this.amount = amount;
+        this.transferId=transferId;
+    }
+    public UUID getTransferId(){
+        return transferId;
     }
     public UUID getFromWalletId(){
         return fromWalletId;
